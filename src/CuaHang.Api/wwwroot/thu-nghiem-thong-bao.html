@@ -1,0 +1,43 @@
+<!doctype html>
+<html lang="vi">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Thử nghiệm thông báo đơn hàng</title>
+</head>
+<body>
+  <h1>Thông báo đơn hàng mới</h1>
+  <label>JWT <input id="token" autocomplete="off"></label>
+  <button id="connect">Kết nối</button>
+  <ul id="events"></ul>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/microsoft-signalr/8.0.7/signalr.min.js"
+          crossorigin="anonymous"></script>
+  <script>
+    const events = document.getElementById("events");
+    document.getElementById("connect").addEventListener("click", async () => {
+      const token = document.getElementById("token").value;
+      const connection = new signalR.HubConnectionBuilder()
+        .withUrl("/hubs/thong-bao", { accessTokenFactory: () => token })
+        .withAutomaticReconnect()
+        .build();
+      connection.on("DonHangMoi", async ({ id }) => {
+        const item = document.createElement("li");
+        item.textContent = `Có đơn hàng mới #${id}. Tải lại trang để kiểm tra dữ liệu hiện tại.`;
+        events.prepend(item);
+        try {
+          const response = await fetch(`/api/don-hang/${encodeURIComponent(id)}`, {
+            headers: { Authorization: `Bearer ${token}` }
+          });
+          if (response.ok) {
+            const result = await response.json();
+            item.textContent = JSON.stringify(result.duLieu);
+          }
+        } catch {
+          item.textContent += " (Không tải được chi tiết; hãy tải lại trang.)";
+        }
+      });
+      await connection.start();
+    });
+  </script>
+</body>
+</html>

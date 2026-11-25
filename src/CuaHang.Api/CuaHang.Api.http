@@ -1,0 +1,100 @@
+@CuaHang.Api_HostAddress = http://localhost:5158
+@username = thay-bang-ten-dang-nhap
+@password = thay-bang-mat-khau-bootstrap
+@token = thay-bang-jwt-token-sau-khi-dang-nhap
+
+### Health check
+GET {{CuaHang.Api_HostAddress}}/api/health
+
+### Đăng nhập bằng tài khoản bootstrap đã cấu hình
+POST {{CuaHang.Api_HostAddress}}/api/xac-thuc/dang-nhap
+Content-Type: application/json
+
+{
+  "tenDangNhap": "{{username}}",
+  "matKhau": "{{password}}"
+}
+
+### Liệt kê sản phẩm
+GET {{CuaHang.Api_HostAddress}}/api/san-pham?page=1&pageSize=20&sapXep=ten
+Accept: application/json
+Authorization: Bearer {{token}}
+
+### Tạo sản phẩm
+POST {{CuaHang.Api_HostAddress}}/api/san-pham
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+{
+  "ten": "Cà phê sữa",
+  "donGia": 25000,
+  "tonKho": 10,
+  "danhMucId": 1,
+  "ghiChu": "Lon 330ml"
+}
+
+### Tìm sản phẩm có tồn thấp
+GET {{CuaHang.Api_HostAddress}}/api/san-pham/ton-thap?nguong=5
+Accept: application/json
+Authorization: Bearer {{token}}
+
+### Sửa tồn kho: thay rowVersion bằng giá trị trả về từ GET sản phẩm
+PUT {{CuaHang.Api_HostAddress}}/api/san-pham/1/ton-kho
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+{
+  "tonKho": 12,
+  "rowVersion": "AAAAAAAAAAE="
+}
+
+### Tạo đơn
+POST {{CuaHang.Api_HostAddress}}/api/don-hang
+Content-Type: application/json
+Authorization: Bearer {{token}}
+Idempotency-Key: don-hang-khach-1-yeu-cau-1
+
+{
+  "khachHangId": 1,
+  "sanPhamId": 1,
+  "soLuong": 10
+}
+
+### Danh sách đơn có lọc và phân trang
+GET {{CuaHang.Api_HostAddress}}/api/don-hang?page=1&pageSize=20&trangThai=Moi
+Accept: application/json
+Authorization: Bearer {{token}}
+
+### Lấy đơn theo mã
+GET {{CuaHang.Api_HostAddress}}/api/don-hang/1
+Accept: application/json
+Authorization: Bearer {{token}}
+
+### Tải hóa đơn PDF (chủ đơn hoặc quản trị viên)
+GET {{CuaHang.Api_HostAddress}}/api/don-hang/1/hoa-don
+Authorization: Bearer {{token}}
+
+### Hủy đơn
+POST {{CuaHang.Api_HostAddress}}/api/don-hang/1/huy
+Authorization: Bearer {{token}}
+
+### Báo cáo doanh số theo sản phẩm và tháng (khoảng nửa mở)
+GET {{CuaHang.Api_HostAddress}}/api/bao-cao/doanh-so-san-pham-theo-thang?tuNgay=2026-01-01T00:00:00Z&denNgay=2026-02-01T00:00:00Z&page=1&pageSize=20
+Accept: application/json
+Authorization: Bearer {{token}}
+
+### Xuất toàn bộ báo cáo trong khoảng thời gian ra Excel (tối đa 10.000 dòng)
+GET {{CuaHang.Api_HostAddress}}/api/bao-cao/doanh-so-san-pham-theo-thang/excel?tuNgay=2026-01-01T00:00:00Z&denNgay=2026-02-01T00:00:00Z
+Authorization: Bearer {{token}}
+
+### Dữ liệu sai: số lượng không dương
+POST {{CuaHang.Api_HostAddress}}/api/don-hang
+Content-Type: application/json
+Authorization: Bearer {{token}}
+Idempotency-Key: don-hang-khach-1-yeu-cau-loi
+
+{
+  "khachHangId": 1,
+  "sanPhamId": 1,
+  "soLuong": 0
+}

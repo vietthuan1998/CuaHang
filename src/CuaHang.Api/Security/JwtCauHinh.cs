@@ -1,0 +1,10 @@
+namespace CuaHang.Api.Security;
+
+public sealed class JwtCauHinh
+{
+    public const string SectionName = "Jwt";
+    public string Issuer { get; init; } = string.Empty;
+    public string Audience { get; init; } = string.Empty;
+    public string SigningKey { get; init; } = string.Empty;
+    public int ThoiHanPhut { get; init; } = 15;
+}
